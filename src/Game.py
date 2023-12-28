@@ -33,13 +33,6 @@ class Game:
         self.board.draw_board(self.screen) # Draw the board using board.draw_tile()
         self.board.draw_all_pieces(self.screen) # Paint all the piece images according to piece positions in board
 
-        # Set selected piece to None for game start
-        #selected_piece = None 
-
-        ######
-        # We will draw tiles and pieces on demand to prevent repetitive painting in the loop
-        ######
-
         # Main game loop
         while True:
             for event in pygame.event.get():
