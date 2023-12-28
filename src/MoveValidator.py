@@ -12,7 +12,6 @@ class MoveValidator:
 class VerticalMoveValidator(MoveValidator):
 
     def get_valid_moves(self, board, position, color):
-        print("Getting vertical valid moves")
         valid_moves = []
         # Loop from y-1 to 0
         for i in range(position[1] - 1, -1, -1):
@@ -49,21 +48,17 @@ class VerticalMoveValidator(MoveValidator):
 class HorizontalMoveValidator(MoveValidator):
 
     def get_valid_moves(self, board, position, color):
-        print("Getting horizontal valid moves")
         valid_moves = []
         # Loop from x-1 to 0
         for i in range(position[0] - 1, -1, -1):
             check_piece = board.get_piece_at_position((i, position[1]))
             # If there is no piece there 
             if check_piece is None:
-                print("Piece here at: " + str(check_piece))
                 valid_position = (i, position[1])
                 valid_moves.append(valid_position)
             else:
                 # Opposite colors 
-                print("No piece here")
                 if check_piece.color is not color:
-                    print("Move is valid")
                     valid_moves.append(check_piece.position)
                     break
                 else:
@@ -72,7 +67,6 @@ class HorizontalMoveValidator(MoveValidator):
         # Loop from y+1 to 7
         for i in range(position[0] + 1, GRID_SIZE):
             check_piece = board.get_piece_at_position((i, position[1]))
-            print("Checking horizontal: " + str((i, position[1])))
             if check_piece is None:
                 valid_position = (i, position[1])
                 valid_moves.append(valid_position)

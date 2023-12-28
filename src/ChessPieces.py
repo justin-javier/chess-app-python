@@ -14,7 +14,7 @@ class Piece():
         self.move_validators = []
         self.valid_moves = []     
 
-    def move(self, board, position):
+    def move(self, position):
         self.position = position
 
     def get_png_name(self):

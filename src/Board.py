@@ -28,14 +28,14 @@ class Board:
     def set_selected_piece(self, piece):
         if piece is not None: 
             piece.set_valid_moves(self)   
-            print("Valid Moves: " + str(piece.get_valid_moves()))   
+            #print("Valid Moves: " + str(piece.get_valid_moves()))   
 
         sp = self.get_selected_piece()
         if sp is None:
             self.last_valid_moves = piece.get_valid_moves()
         else:
             self.last_valid_moves = sp.get_valid_moves()
-        print("Last Valid Moves: " + str(self.last_valid_moves))
+        #print("Last Valid Moves: " + str(self.last_valid_moves))
         self.selected_piece = piece
 
     def get_selected_piece(self):
@@ -47,13 +47,14 @@ class Board:
 
     def set_piece_at_position(self, position, piece):
         x, y = position
+        if piece is not None:
+            piece.move(position)
         self.tiles[x][y] = piece
 
     # Paint a tile (and piece if present) given specific coordinates
     def draw_tile(self, screen, position, color):       
         x, y = position
         pygame.draw.rect(screen, color, (x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-        piece = self.get_piece_at_position((x,y))
 
     def draw_regular_tile(self, screen, position):
         x, y = position
