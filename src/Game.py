@@ -27,11 +27,10 @@ class Game:
         self.player_turn = "White"
 
     def main(self): 
-
-        self.board.load_piece_images() # Load all images into board
         self.board.init_start_positions() # Places all pieces in game start positions
-        self.board.draw_board(self.screen) # Draw the board using board.draw_tile()
-        self.board.draw_all_pieces(self.screen) # Paint all the piece images according to piece positions in board
+
+        self.board.painter.draw_board(self.screen) # Draw the board using board.draw_tile()
+        self.board.painter.draw_all_pieces(self.screen, self.board) # Paint all the piece images according to piece positions in board
 
         # Main game loop
         while True:
@@ -72,7 +71,7 @@ class Game:
 
     # Handles selecting of a piece (clicking tile with a piece inside)
     def handle_select_piece_tile(self, position):
-        sp = self.board.get_selected_piece()
+        sp = self.board.selected_piece
         # If no piece is currently selected and its the color of the current turn player
         if (sp is None):
             np = self.board.get_piece_at_position(position)
@@ -80,23 +79,16 @@ class Game:
                 # Save piece as selected_piece (piece that wants to move)
                 self.board.set_selected_piece(np) 
                 # This will highlight the tile and draw the piece selected
-                self.board.draw_highlighted_tile(self.screen, position)
-                self.board.draw_piece(self.screen, np)
-                # Highlight the selected piece's valid moves
-                self.board.highlight_valid_move_tiles(self.screen)
+                self.board.painter.draw_select_new_piece(self.screen, self.board, np)
 
         # If a piece is selected already
         else:
             # If we are selecting the same piece (for deselection)
             if sp.position[0] == position[0] and sp.position[1] == position[1]:
                 self.board.set_selected_piece(None)
-                self.board.unhighlight_valid_move_tiles(self.screen)
-                self.board.draw_regular_tile(self.screen, position)
-                self.board.draw_piece(self.screen, sp)
+                self.board.painter.draw_deselect_selected_piece(self.screen, self.board, sp)
             # Else we want to select a new piece
             else:
-
-                #print("Selecting new piece")
                 np = self.board.get_piece_at_position(position) # New piece selected
 
                 # If we want to capture
@@ -113,10 +105,7 @@ class Game:
                         self.black_player.capture_piece(np)
 
                     # Update graphics
-                    self.board.unhighlight_valid_move_tiles(self.screen)
-                    self.board.draw_regular_tile(self.screen, old_position)
-                    self.board.draw_regular_tile(self.screen, position)
-                    self.board.draw_piece(self.screen, sp)
+                    self.board.painter.draw_capture(self.screen, self.board, sp, old_position)
 
                     # Change player turn
                     self.switch_turn()
@@ -125,38 +114,27 @@ class Game:
                     if (np.color == sp.color):
                         # If we want to switch our selected piece
                         self.board.set_selected_piece(np)
-                        self.board.unhighlight_valid_move_tiles(self.screen)
-                        self.board.draw_regular_tile(self.screen, sp.position)
-                        self.board.draw_piece(self.screen, sp)
-                        self.board.draw_highlighted_tile(self.screen, position)
-                        self.board.draw_piece(self.screen, np)
-                        self.board.highlight_valid_move_tiles(self.screen)
 
-        #print(str(self.board.get_selected_piece()))
-
+                        # painter func here
+                        self.board.painter.draw_switch_selected_piece(self.screen, self.board, sp, np)
 
     # Handles selecting of a empty tile
     def handle_select_empty_tile(self, position):
-        sp = self.board.get_selected_piece()
+        sp = self.board.selected_piece
         # If we want to move the selected piece to a new tile
         if sp is not None:
             if position in sp.get_valid_moves():
+                old_position = sp.position
                 # Remove the piece's old position in pieces_on_board
-                self.board.set_piece_at_position(sp.position, None)
+                self.board.set_piece_at_position(old_position, None)
                 # Clear the currently selected piece
                 self.board.set_selected_piece(None)
-                self.board.unhighlight_valid_move_tiles(self.screen)
-
-                # Unhighlight the tile that the piece is moving from
-                self.board.draw_regular_tile(self.screen, sp.position)
                 # Update the position in pieces_on_board
-                self.board.set_piece_at_position(position, sp)         
-                # Draw piece and tile at the destination
-                self.board.draw_regular_tile(self.screen, position) # Maybe not necessary bc we're moving to empty tile
-                self.board.draw_piece(self.screen, sp)
-      
+                self.board.set_piece_at_position(position, sp) 
+
+                self.board.painter.draw_move_to_empty_tile(self.screen, self.board, sp, old_position)
+
                 self.switch_turn()
-        #print(str(self.board.get_selected_piece()))
 
     def switch_turn(self):
             if self.player_turn == "White":

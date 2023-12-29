@@ -1,6 +1,7 @@
 import pygame
 import os
 from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn
+from BoardPainter import BoardPainter
 
 # Constants
 WIDTH, HEIGHT = 600, 600
@@ -18,28 +19,20 @@ class Board:
         self.selected_piece = None
         self.piece_images = {}
         self.last_valid_moves = []
-
-    def set_piece_images(self, images):
-        self.piece_images = images
-
-    def get_piece_images(self):
-        return self.piece_images
+        self.painter = BoardPainter()
 
     def set_selected_piece(self, piece):
         if piece is not None: 
             piece.set_valid_moves(self)   
             #print("Valid Moves: " + str(piece.get_valid_moves()))   
 
-        sp = self.get_selected_piece()
+        sp = self.selected_piece
         if sp is None:
             self.last_valid_moves = piece.get_valid_moves()
         else:
             self.last_valid_moves = sp.get_valid_moves()
         #print("Last Valid Moves: " + str(self.last_valid_moves))
         self.selected_piece = piece
-
-    def get_selected_piece(self):
-        return self.selected_piece
 
     def get_piece_at_position(self, position):
         x, y = position
@@ -51,66 +44,6 @@ class Board:
             piece.move(position)
         self.tiles[x][y] = piece
 
-    # Paint a tile (and piece if present) given specific coordinates
-    def draw_tile(self, screen, position, color):       
-        x, y = position
-        pygame.draw.rect(screen, color, (x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-
-    def draw_regular_tile(self, screen, position):
-        x, y = position
-        is_even = (x + y) % 2 == 0
-        # Return color based on even/odd result
-        color = LIGHT_TILE_COLOR if is_even else DARK_TILE_COLOR
-        self.draw_tile(screen, position, color)
-
-    def draw_highlighted_tile(self, screen, position):
-        color = HIGHLIGHT_TILE_COLOR
-        center_x = (position[0] * SQUARE_SIZE) + (SQUARE_SIZE // 2) + (WIDTH - GRID_SIZE * SQUARE_SIZE) // 2
-        center_y = (position[1] * SQUARE_SIZE) + (SQUARE_SIZE // 2) + (HEIGHT - GRID_SIZE * SQUARE_SIZE) // 2
-
-        # Calculate the radius of the circle (you can adjust this)
-        radius = SQUARE_SIZE // 2.5
-
-        self.draw_regular_tile(screen, position)
-        pygame.draw.circle(screen, color, (center_x, center_y), radius)
-
-    # Highlights the tiles a Piece can move to
-    def highlight_valid_move_tiles(self, screen):
-        piece = self.get_selected_piece()
-        valid_moves = piece.get_valid_moves()
-        # Get all the potential moves 
-        for move in valid_moves:
-            self.draw_highlighted_tile(screen, move)
-            self.draw_piece(screen, self.get_piece_at_position(move))
-
-    def unhighlight_valid_move_tiles(self, screen):
-        #print("Unhighlighting tiles")
-        for move in self.last_valid_moves:
-            self.draw_regular_tile(screen, move)
-            self.draw_piece(screen, self.get_piece_at_position(move))
-
-    # Draws the board
-    def draw_board(self, screen):
-        # Draw the chessboard
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
-                self.draw_regular_tile(screen, (x, y))
-
-    # Draw a piece to a screen given the Piece object
-    def draw_piece(self, screen, piece):
-        if piece is not None:
-            png_name = piece.get_png_name()
-            x = piece.position[0]
-            y = piece.position[1]
-            screen.blit(self.piece_images[png_name], (x * SQUARE_SIZE, y * SQUARE_SIZE))
-
-    # Draw all chess pieces according to their positions
-    def draw_all_pieces(self, screen):
-        for row in self.tiles:
-            for piece in row:
-                if piece != None:
-                    self.draw_piece(screen, piece)
-
     # Sets all the valid moves for every piece
     def set_all_valid_moves(self):
         for row in range(GRID_SIZE):
@@ -118,23 +51,6 @@ class Board:
                 piece = self.get_piece_at_position((row, col))
                 if piece is not None:
                     piece.set_valid_moves(self)
-
-    # Load piece images, scale them down, and return them in a dict 
-    def load_piece_images(self):
-        images = {}
-        directory = "../resources"  # Change this to the actual path of your images folder
-        try:
-            for filename in os.listdir(directory):
-                if filename.endswith(".png"):
-                    name = os.path.splitext(filename)[0]  # Extract the filename without extension
-                    path = os.path.join(directory, filename)
-                    image = pygame.image.load(path).convert_alpha()
-                    scaled_image = pygame.transform.scale(image, (SQUARE_SIZE, SQUARE_SIZE))
-                    images[name] = scaled_image
-        except FileNotFoundError:
-            print(f"Error: Directory not found - {directory}")
-
-        self.piece_images = images
 
     # Populate the pieces_on_board with the starting positions of all pieces
     def init_start_positions(self):
