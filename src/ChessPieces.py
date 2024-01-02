@@ -30,11 +30,38 @@ class Piece():
         for move in self.valid_moves:
             if move == position: return True
 
-    def set_valid_moves(self, board):
+    def calculate_valid_moves(self, board):
         # Clear previous valid moves
-        self.valid_moves = []
+        valid_moves = []
         for validator in self.move_validators:
-            self.valid_moves.extend(validator.get_valid_moves(board, self.position, self.color))
+            initial_moves = validator.get_valid_moves(board, self.position, self.color)
+            # Check if any of these moves would expose the king to an enemy attack
+            filtered_moves = []
+            #print(initial_moves)
+            for move in initial_moves:
+                # Temporarily move piece to new position and see if the king is exposed
+                original_position = self.position
+                temp_piece = board.get_piece_at_position(move)
+
+                #print("Before Temp Move - Piece Position:", original_position)
+                board.set_piece_at_position(self.position, None)  # Empty old position
+                board.set_piece_at_position(move, self)  # Populate new possible position
+                #print("After Temp Move - Piece Position:", self.position)
+
+                # Check if the king is exposed
+                if not board.is_king_exposed(self.color):
+                    filtered_moves.append(move)
+
+                # Undo the temporary move
+                board.set_piece_at_position(move, temp_piece)
+                board.set_piece_at_position(original_position, self)
+                
+            valid_moves.extend(filtered_moves)
+
+        return valid_moves
+    
+    def set_valid_moves(self, valid_moves):
+        self.valid_moves = valid_moves
 
     def get_valid_moves(self):
         return self.valid_moves
@@ -46,8 +73,6 @@ class Pawn(Piece):
             PawnMoveValidator()
         ])
 
-    def special_pawn_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")
 
 class Knight(Piece):
     def __init__(self, color, position):
@@ -56,8 +81,6 @@ class Knight(Piece):
             KnightMoveValidator()
         ])
 
-    def special_knight_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")
 
 class Bishop(Piece):
     def __init__(self, color, position):
@@ -66,8 +89,6 @@ class Bishop(Piece):
             DiagonalMoveValidator()
         ])
 
-    def special_bishop_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")
 
 class Rook(Piece):
     def __init__(self, color, position):
@@ -77,8 +98,6 @@ class Rook(Piece):
             HorizontalMoveValidator()        
         ])
 
-    def special_rook_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")
 
 class Queen(Piece):
     def __init__(self, color, position):
@@ -89,15 +108,9 @@ class Queen(Piece):
             DiagonalMoveValidator()
         ])
 
-    def special_queen_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")
-
 class King(Piece):
     def __init__(self, color, position):
         super().__init__(color, position)
         self.move_validators.extend([
             SingleMoveValidator()
         ])
-
-    def special_king_method(self):
-        print(f"This is a special method for {self.__class__.__name__}")

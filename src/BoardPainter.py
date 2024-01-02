@@ -13,7 +13,8 @@ HIGHLIGHT_TILE_COLOR = (186, 202, 68) # Light green
 
 class BoardPainter:
     def __init__(self):
-        self.piece_images = self.load_piece_images("../resources") # Load all images into board
+        print(os.getcwd() + "/resources/")
+        self.piece_images = self.load_piece_images(os.getcwd() + "/resources/") # Load all images into board
 
     def draw_tile(self, screen, position, color):       
         x, y = position
@@ -56,19 +57,16 @@ class BoardPainter:
             screen.blit(self.piece_images[png_name], (x * SQUARE_SIZE, y * SQUARE_SIZE))
 
     def draw_all_pieces(self, screen, board):
-        for row in board.tiles:
-            for piece in row:
-                if piece is not None:
-                    self.draw_piece(screen, piece)
+        for piece in board.tiles.values():
+            if piece is not None:
+                self.draw_piece(screen, piece)
 
     # Takes references to the screen, board, piece's old position, and piece
     def draw_move_to_empty_tile(self, screen, board, piece, old_position):
         self.unhighlight_valid_move_tiles(screen, board)
         # Unhighlight the tile that the piece is moving from
         self.draw_regular_tile(screen, old_position)
-
         # Draw piece and tile at the destination
-        self.draw_regular_tile(screen, piece.position) # Maybe not necessary bc we're moving to empty tile
         self.draw_piece(screen, piece)
 
     def draw_switch_selected_piece(self, screen, board, old_piece, new_piece):
@@ -111,5 +109,4 @@ class BoardPainter:
                     images[name] = scaled_image
         except FileNotFoundError:
             print(f"Error: Directory not found - {directory}")
-
         return images

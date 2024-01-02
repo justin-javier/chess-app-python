@@ -7,7 +7,9 @@ class MoveValidator:
 
     def get_valid_moves(self, current_position, target_position):
         raise NotImplementedError("Subclasses must implement this method")
-
+    
+    def get_type(self):
+        return self.__class__.__name__
 
 class VerticalMoveValidator(MoveValidator):
 
