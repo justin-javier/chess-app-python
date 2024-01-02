@@ -37,16 +37,13 @@ class Piece():
             initial_moves = validator.get_valid_moves(board, self.position, self.color)
             # Check if any of these moves would expose the king to an enemy attack
             filtered_moves = []
-            #print(initial_moves)
             for move in initial_moves:
                 # Temporarily move piece to new position and see if the king is exposed
                 original_position = self.position
                 temp_piece = board.get_piece_at_position(move)
 
-                #print("Before Temp Move - Piece Position:", original_position)
                 board.set_piece_at_position(self.position, None)  # Empty old position
                 board.set_piece_at_position(move, self)  # Populate new possible position
-                #print("After Temp Move - Piece Position:", self.position)
 
                 # Check if the king is exposed
                 if not board.is_king_exposed(self.color):

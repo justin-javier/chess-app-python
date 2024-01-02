@@ -67,7 +67,22 @@ class Game:
         # If we're selecting a piece
         else:
             self.handle_select_piece_tile((pos_x, pos_y))
-        #print(self.player_turn)
+
+        # Check for checkmate
+        if self.board.is_checkmate("White"):
+            print("Checkmate! Black wins.")
+            #pygame.quit()
+            #sys.exit()
+        elif self.board.is_checkmate("Black"):
+            print("Checkmate! White wins.")
+            #pygame.quit()
+            #sys.exit()
+
+        # Check for stalemate
+        if self.board.is_stalemate("White") or self.board.is_stalemate("Black"):
+            print("Stalemate! No one wins.")
+            #pygame.quit()
+            #sys.exit()
 
     # Handles selecting of a piece (clicking tile with a piece inside)
     def handle_select_piece_tile(self, position):
