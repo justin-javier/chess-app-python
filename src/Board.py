@@ -1,5 +1,6 @@
 import pygame
 import os
+import copy
 from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn
 from BoardPainter import BoardPainter
 from MoveValidator import (
@@ -23,9 +24,9 @@ class Board:
     def __init__(self):
         self.tiles = {}
         self.selected_piece = None
+        self.painter = None
         self.last_valid_moves = []
         self.king_positions = {"White": (4, 7), "Black": (4, 0)}
-        self.painter = BoardPainter()
 
     def set_selected_piece(self, piece):
         if piece is not None: 
@@ -41,21 +42,15 @@ class Board:
         self.selected_piece = piece
         #print("selected piece: " + str(self.selected_piece))
 
-    def get_piece_at_position(self, position):
-        return self.tiles.get(position)
-
     def set_piece_at_position(self, position, piece):
         if piece is not None:
             piece.move(position)
-            if isinstance(piece, King):
-                self.king_positions[piece.color] = position
-
         self.tiles[position] = piece
 
     # Sets all the valid moves for every piece
     def set_all_valid_moves(self):
         for position in self.tiles.values():
-            piece = self.get_piece_at_position(position)
+            piece = self.tiles.get(position)
             if piece is not None:
                 valid_moves = piece.calculate_valid_moves(self)
                 piece.set_valid_moves(valid_moves)
@@ -69,7 +64,7 @@ class Board:
             moves = validator.get_valid_moves(self, position, color)
             # Check if any of the moves ends with an enemy piece that has the same validator
             for move in moves:
-                piece = self.get_piece_at_position(move)
+                piece = self.tiles.get(move)
                 if piece is not None:
                     for piece_validator in piece.move_validators:
                         if piece_validator.get_type() == validator.get_type():
@@ -81,14 +76,19 @@ class Board:
         Check if the king of the specified color is exposed.
         """
         # Get king position
-        king_position = self.king_positions[color]
+        king_position = self.get_king_position(color)
 
         # Ensure king_position is a tuple (x, y)
         if not isinstance(king_position, tuple):
             return False
-
         # Check if the king position is under attack
         return self.is_position_under_attack(king_position, color)
+
+    def get_king_position(self, color):
+        for pos, piece in self.tiles.items():
+            if piece is not None and isinstance(piece, King) and piece.color == color:
+                return pos
+        return
 
     # Populate the pieces_on_board with the starting positions of all pieces
     def init_start_positions(self):
@@ -98,13 +98,15 @@ class Board:
             black_pawn = Pawn(color="Black", position=(i, 1))
             white_pawn = Pawn(color="White", position=(i, 6))
 
-            self.set_piece_at_position((i, 1), black_pawn)
-            self.set_piece_at_position((i, 6), white_pawn)
+            self.tiles[(i, 1)] = black_pawn
+            self.tiles[(i, 6)] = white_pawn
 
         for i, piece_type in enumerate(piece_order):
             black_piece = piece_type(color="Black", position=(i, 0))
             white_piece = piece_type(color="White", position=(i, 7))
 
-            self.set_piece_at_position((i, 0), black_piece)
-            self.set_piece_at_position((i, 7), white_piece)
+            self.tiles[(i, 0)] = black_piece
+            self.tiles[(i, 7)] = white_piece
 
+    def init_painter(self):
+        self.painter = BoardPainter()

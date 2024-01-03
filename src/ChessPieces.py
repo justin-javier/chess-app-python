@@ -41,18 +41,22 @@ class Piece():
             for move in initial_moves:
                 # Temporarily move piece to new position and see if the king is exposed
                 original_position = self.position
-                temp_piece = board.get_piece_at_position(move)
+                temp_piece = board.tiles.get(move)
                 #print("Temporarily moving " + str(temp_piece) + " and " + str(self))
-                board.set_piece_at_position(self.position, None)  # Empty old position
-                board.set_piece_at_position(move, self)  # Populate new possible position
+                #board.set_piece_at_position(self.position, None)  # Empty old position
+                #board.set_piece_at_position(move, self)  # Populate new possible position
+                board.tiles[original_position] = None
+                board.tiles[move] = self
 
                 # Check if the king is exposed
                 if not board.is_king_exposed(self.color):
                     filtered_moves.append(move)
 
                 # Undo the temporary move
-                board.set_piece_at_position(move, temp_piece)
-                board.set_piece_at_position(original_position, self)
+                #board.set_piece_at_position(move, temp_piece)
+                #board.set_piece_at_position(original_position, self)
+                board.tiles[move] = temp_piece
+                board.tiles[original_position] = self
             valid_moves.extend(filtered_moves)
 
         return valid_moves
@@ -70,6 +74,16 @@ class Pawn(Piece):
         self.move_validators.extend([
             PawnMoveValidator()
         ])
+        self.en_passant_vulnerable = False
+    
+    def move(self, position):
+        # Check if the pawn moved two squares, making it vulnerable to en passant
+        if abs(position[1] - self.position[1]) == 2:
+            self.en_passant_vulnerable = True
+        else:
+            self.en_passant_vulnerable = False
+            
+        super().move(position)
 
 
 class Knight(Piece):
@@ -98,6 +112,7 @@ class Rook(Piece):
         self.has_moved = False
 
     def move(self, position):
+        self.has_moved = True
         self.position = position
 
 
@@ -120,6 +135,7 @@ class King(Piece):
         
     def move(self, position):
         #print("Moving " + str(self))
+        self.has_moved = True
         self.position = position
 
     def calculate_valid_moves(self, board):
@@ -137,16 +153,16 @@ class King(Piece):
 
     def can_castle_kingside(self, board):
         for i in range(self.position[0] + 1, GRID_SIZE - 1):
-            piece = board.get_piece_at_position((i, self.position[1]))
+            piece = board.tiles.get((i, self.position[1]))
             if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):
                 return False
-        rook = board.get_piece_at_position((7, self.position[1]))
+        rook = board.tiles.get((7, self.position[1]))
         return isinstance(rook, Rook) and not rook.has_moved
 
     def can_castle_queenside(self, board):
         for i in range(self.position[0] - 1, 0, -1):
-            piece = board.get_piece_at_position((i, self.position[1]))
+            piece = board.tiles.get((i, self.position[1]))
             if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):
                 return False
-        rook = board.get_piece_at_position((0, self.position[1]))
+        rook = board.tiles.get((0, self.position[1]))
         return isinstance(rook, Rook) and not rook.has_moved

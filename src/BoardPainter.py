@@ -38,12 +38,12 @@ class BoardPainter:
     def highlight_valid_move_tiles(self, screen, board):
         for move in board.selected_piece.valid_moves:
             self.draw_highlighted_tile(screen, move)
-            self.draw_piece(screen, board.get_piece_at_position(move))
+            self.draw_piece(screen, board.tiles.get(move))
 
     def unhighlight_valid_move_tiles(self, screen, board):
         for move in board.last_valid_moves:
             self.draw_regular_tile(screen, move)
-            self.draw_piece(screen, board.get_piece_at_position(move))
+            self.draw_piece(screen, board.tiles.get(move))
 
     def draw_board(self, screen):
         for x in range(GRID_SIZE):

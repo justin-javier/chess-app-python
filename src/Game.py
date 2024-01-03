@@ -26,7 +26,7 @@ class Game:
 
     def main(self): 
         self.board.init_start_positions() # Places all pieces in game start positions
-
+        self.board.init_painter()
         self.board.painter.draw_board(self.screen) # Draw the board using board.draw_tile()
         self.board.painter.draw_all_pieces(self.screen, self.board) # Paint all the piece images according to piece positions in board
         update_display = False
