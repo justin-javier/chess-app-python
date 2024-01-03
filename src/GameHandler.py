@@ -1,6 +1,6 @@
 import pygame
-import sys
-from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn    
+from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn
+from StateChecker import StateChecker
 from Board import Board
 from Player import Player
 
@@ -18,6 +18,7 @@ class GameHandler():
     def __init__(self, screen, board):
         self.screen = screen
         self.board = board
+        self.state_checker = StateChecker()
         self.white_player = Player(player_type="White")
         self.black_player = Player(player_type="Black")
         self.player_turn = "White"
@@ -45,25 +46,6 @@ class GameHandler():
         else:
             self.handle_select_piece_tile((pos_x, pos_y))
         
-        self.check_game_end()
-
-    def check_game_end(self):
-        # Check for checkmate
-        if self.is_checkmate("White"):
-            print("Checkmate! Black wins.")
-            #pygame.quit()
-            #sys.exit()
-        elif self.is_checkmate("Black"):
-            print("Checkmate! White wins.")
-            #pygame.quit()
-            #sys.exit()
-
-        # Check for stalemate
-        if self.is_stalemate("White") or self.is_stalemate("Black"):
-            print("Stalemate! No one wins.")
-            #pygame.quit()
-            #sys.exit()
-
     # Handles selecting of a piece (clicking tile with a piece inside)
     def handle_select_piece_tile(self, position):
         sp = self.board.selected_piece
@@ -107,9 +89,10 @@ class GameHandler():
 
                     # Update graphics
                     self.board.painter.draw_capture(self.screen, self.board, sp, old_position)
-
                     # Change player turn
                     self.switch_turn()
+                    self.state_checker.check_game_end(self.board, self.player_turn)
+
 
                 else:
                     if (np.color == sp.color):
@@ -140,8 +123,10 @@ class GameHandler():
 
             self.board.painter.draw_move_to_empty_tile(self.screen, self.board, sp, old_position)
             self.handle_castling(sp, old_position, position)
-            
+
             self.switch_turn()
+            self.state_checker.check_game_end(self.board, self.player_turn)
+
 
     def handle_castling(self, piece, old_position, new_position):
         if (isinstance(piece, King)) and (old_position[0] - new_position[0] == 2):
@@ -159,36 +144,6 @@ class GameHandler():
             self.board.set_piece_at_position((7, new_position[1]), None)
             self.board.set_piece_at_position((new_position[0] - 1, new_position[1]), rook)
             self.board.painter.draw_move_to_empty_tile(self.screen, self.board, rook, (7, new_position[1]))
-    
-
-    def is_checkmate(self, color):
-        # Check if the king is in check
-        if self.board.is_king_exposed(color):
-            print("CHECK!")
-            # Iterate through all pieces of the current player
-            pieces = [piece for piece in self.board.tiles.values() if piece and piece.color == color]
-            all_moves = []
-            for piece in pieces:
-                all_moves.extend(piece.calculate_valid_moves(self.board))
-                if len(all_moves) != 0:
-                    return False
-            return True
-        return False
-
-    def is_stalemate(self, color):
-        # Check if the king is not in check
-        if not self.board.is_king_exposed(color):
-            # Iterate over all pieces of the specified color
-            pieces = [piece for piece in self.board.tiles.values() if piece and piece.color == color]
-            for piece in pieces:
-                # Check if the piece has any valid moves
-                if piece.calculate_valid_moves(self.board):
-                    # If any piece has valid moves, it's not stalemate
-                    return False
-            # All pieces have no valid moves, it's stalemate
-            return True
-        # King is in check, not stalemate
-        return False
 
     def switch_turn(self):
         if self.player_turn == "White":

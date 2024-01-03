@@ -138,7 +138,7 @@ class King(Piece):
     def can_castle_kingside(self, board):
         for i in range(self.position[0] + 1, GRID_SIZE - 1):
             piece = board.get_piece_at_position((i, self.position[1]))
-            if piece is not None:
+            if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):
                 return False
         rook = board.get_piece_at_position((7, self.position[1]))
         return isinstance(rook, Rook) and not rook.has_moved
@@ -146,7 +146,7 @@ class King(Piece):
     def can_castle_queenside(self, board):
         for i in range(self.position[0] - 1, 0, -1):
             piece = board.get_piece_at_position((i, self.position[1]))
-            if piece is not None:
+            if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):
                 return False
         rook = board.get_piece_at_position((0, self.position[1]))
         return isinstance(rook, Rook) and not rook.has_moved

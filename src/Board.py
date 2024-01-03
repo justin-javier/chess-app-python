@@ -59,20 +59,14 @@ class Board:
             if piece is not None:
                 valid_moves = piece.calculate_valid_moves(self)
                 piece.set_valid_moves(valid_moves)
-
-    '''
-    Given the board's piece layout, check if a king is in check.
-    When calculating a piece's valid moves, we temporarily alter the board to a state where
-    a potential valid move is made, then check if it exposes the king.
-    Otherwise, if called on a non-altered board state, it will return True if there is a current check
-    '''
-    def is_king_exposed(self, color):
-        # Get king position
-        king_position = self.king_positions[color]
-        # Check each of the relevant validators
+    
+    def is_position_under_attack(self, position, color):
+        """
+        Check if a given position is under attack by any opponent pieces.
+        """
         for validator in [VerticalMoveValidator(), HorizontalMoveValidator(), DiagonalMoveValidator(), KnightMoveValidator()]:
             # Calculate valid moves per validator
-            moves = validator.get_valid_moves(self, king_position, color)
+            moves = validator.get_valid_moves(self, position, color)
             # Check if any of the moves ends with an enemy piece that has the same validator
             for move in moves:
                 piece = self.get_piece_at_position(move)
@@ -81,6 +75,20 @@ class Board:
                         if piece_validator.get_type() == validator.get_type():
                             return True
         return False
+
+    def is_king_exposed(self, color):
+        """
+        Check if the king of the specified color is exposed.
+        """
+        # Get king position
+        king_position = self.king_positions[color]
+
+        # Ensure king_position is a tuple (x, y)
+        if not isinstance(king_position, tuple):
+            return False
+
+        # Check if the king position is under attack
+        return self.is_position_under_attack(king_position, color)
 
     # Populate the pieces_on_board with the starting positions of all pieces
     def init_start_positions(self):

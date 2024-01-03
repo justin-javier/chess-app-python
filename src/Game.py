@@ -29,20 +29,26 @@ class Game:
 
         self.board.painter.draw_board(self.screen) # Draw the board using board.draw_tile()
         self.board.painter.draw_all_pieces(self.screen, self.board) # Paint all the piece images according to piece positions in board
+        update_display = False
 
+        clock = pygame.time.Clock()
+        FRAME_RATE = 5
+
+        pygame.display.flip()
         # Main game loop
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:  # Use MOUSEBUTTONUP instead of MOUSEBUTTONDOWN
                     # Handle the mouse click
                     self.handler.handle_mouse_click(event)
+                    pygame.display.flip()
+            
+            clock.tick(FRAME_RATE)
 
-            # Update the display
-            pygame.display.flip()
-
+            
 
 
 if __name__ == "__main__":
