@@ -6,6 +6,7 @@ from MoveValidator import (
     SingleMoveValidator, 
     PawnMoveValidator
 )
+GRID_SIZE = 8
 
 class Piece():
     def __init__(self, color, position):
@@ -41,7 +42,7 @@ class Piece():
                 # Temporarily move piece to new position and see if the king is exposed
                 original_position = self.position
                 temp_piece = board.get_piece_at_position(move)
-
+                #print("Temporarily moving " + str(temp_piece) + " and " + str(self))
                 board.set_piece_at_position(self.position, None)  # Empty old position
                 board.set_piece_at_position(move, self)  # Populate new possible position
 
@@ -52,11 +53,11 @@ class Piece():
                 # Undo the temporary move
                 board.set_piece_at_position(move, temp_piece)
                 board.set_piece_at_position(original_position, self)
-                
             valid_moves.extend(filtered_moves)
 
         return valid_moves
     
+
     def set_valid_moves(self, valid_moves):
         self.valid_moves = valid_moves
 
@@ -94,6 +95,10 @@ class Rook(Piece):
             VerticalMoveValidator(),
             HorizontalMoveValidator()        
         ])
+        self.has_moved = False
+
+    def move(self, position):
+        self.position = position
 
 
 class Queen(Piece):
@@ -111,3 +116,37 @@ class King(Piece):
         self.move_validators.extend([
             SingleMoveValidator()
         ])
+        self.has_moved = False
+        
+    def move(self, position):
+        #print("Moving " + str(self))
+        self.position = position
+
+    def calculate_valid_moves(self, board):
+        valid_moves = super().calculate_valid_moves(board)
+
+        # Check kingside castling
+        if not self.has_moved and self.can_castle_kingside(board):
+            valid_moves.append((self.position[0] + 2, self.position[1]))
+
+        # Check queenside castling
+        if not self.has_moved and self.can_castle_queenside(board):
+            valid_moves.append((self.position[0] - 2, self.position[1]))
+
+        return valid_moves
+
+    def can_castle_kingside(self, board):
+        for i in range(self.position[0] + 1, GRID_SIZE - 1):
+            piece = board.get_piece_at_position((i, self.position[1]))
+            if piece is not None:
+                return False
+        rook = board.get_piece_at_position((7, self.position[1]))
+        return isinstance(rook, Rook) and not rook.has_moved
+
+    def can_castle_queenside(self, board):
+        for i in range(self.position[0] - 1, 0, -1):
+            piece = board.get_piece_at_position((i, self.position[1]))
+            if piece is not None:
+                return False
+        rook = board.get_piece_at_position((0, self.position[1]))
+        return isinstance(rook, Rook) and not rook.has_moved

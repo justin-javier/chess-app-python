@@ -24,7 +24,7 @@ class Board:
         self.tiles = {}
         self.selected_piece = None
         self.last_valid_moves = []
-        self.king_positions = {"White": None, "Black": None}
+        self.king_positions = {"White": (4, 7), "Black": (4, 0)}
         self.painter = BoardPainter()
 
     def set_selected_piece(self, piece):
@@ -39,6 +39,7 @@ class Board:
             self.last_valid_moves = sp.get_valid_moves()
 
         self.selected_piece = piece
+        #print("selected piece: " + str(self.selected_piece))
 
     def get_piece_at_position(self, position):
         return self.tiles.get(position)
@@ -48,6 +49,7 @@ class Board:
             piece.move(position)
             if isinstance(piece, King):
                 self.king_positions[piece.color] = position
+
         self.tiles[position] = piece
 
     # Sets all the valid moves for every piece
@@ -78,37 +80,6 @@ class Board:
                     for piece_validator in piece.move_validators:
                         if piece_validator.get_type() == validator.get_type():
                             return True
-        return False
-
-    def is_checkmate(self, color):
-        # Check if the king is in check
-        if self.is_king_exposed(color):
-            print("CHECK!")
-            # Iterate through all pieces of the current player
-            pieces = [piece for piece in self.tiles.values() if piece and piece.color == color]
-            all_moves = []
-            for piece in pieces:
-                all_moves.extend(piece.calculate_valid_moves(self))
-
-            return len(all_moves) == 0
-        return False
-
-        # If there are no legal moves, it's checkmate
-        return len(all_moves) == 0
-
-    def is_stalemate(self, color):
-        # Check if the king is not in check
-        if not self.is_king_exposed(color):
-            # Iterate over all pieces of the specified color
-            pieces = [piece for piece in self.tiles.values() if piece and piece.color == color]
-            for piece in pieces:
-                # Check if the piece has any valid moves
-                if piece.calculate_valid_moves(self):
-                    # If any piece has valid moves, it's not stalemate
-                    return False
-            # All pieces have no valid moves, it's stalemate
-            return True
-        # King is in check, not stalemate
         return False
 
     # Populate the pieces_on_board with the starting positions of all pieces
