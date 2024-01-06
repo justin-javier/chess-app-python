@@ -26,8 +26,10 @@ class Board:
     def __init__(self):
         self.tiles = {}
         self.selected_piece = None
-        self.painter = None
         self.last_valid_moves = []
+        self.painter = BoardPainter()
+
+        self.init_start_positions()
 
     def set_selected_piece(self, piece):
         if piece is not None: 
@@ -126,5 +128,4 @@ class Board:
             self.tiles[(i, 0)] = black_piece
             self.tiles[(i, 7)] = white_piece
 
-    def init_painter(self):
-        self.painter = BoardPainter()
+

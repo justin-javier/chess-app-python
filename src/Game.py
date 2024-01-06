@@ -25,11 +25,9 @@ class Game:
         self.handler = GameHandler(self.screen, self.board)
 
     def main(self): 
-        self.board.init_start_positions() # Places all pieces in game start positions
-        self.board.init_painter()
-        self.board.painter.draw_board(self.screen) # Draw the board using board.draw_tile()
-        self.board.painter.draw_all_pieces(self.screen, self.board) # Paint all the piece images according to piece positions in board
-        update_display = False
+
+        self.board.painter.draw_board(self.screen) 
+        self.board.painter.draw_all_pieces(self.screen, self.board)
 
         clock = pygame.time.Clock()
         FRAME_RATE = 15
@@ -41,10 +39,10 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:  # Use MOUSEBUTTONUP instead of MOUSEBUTTONDOWN
-                    # Handle the mouse click
+                elif event.type == pygame.MOUSEBUTTONDOWN: 
+
                     self.handler.handle_mouse_click(event)
-                    pygame.display.flip()
+                    pygame.display.flip() # Makes refreshing images pretty efficient
             
             clock.tick(FRAME_RATE)
 

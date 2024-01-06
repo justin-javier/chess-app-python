@@ -8,7 +8,7 @@ from MoveValidator import (
 )
 GRID_SIZE = 8
 
-class Piece():
+class Piece:
     def __init__(self, color, position):
         self.color = color
         self.position = position
@@ -168,11 +168,19 @@ class King(Piece):
         valid_moves = super().calculate_valid_moves(board)
 
         # Check kingside castling
-        if not self.has_moved and self.can_castle_kingside(board):
+        if (
+            not self.has_moved 
+            and self.can_castle_kingside(board) 
+            and not board.is_king_exposed(self.color)
+        ):
             valid_moves.append((self.position[0] + 2, self.position[1]))
 
         # Check queenside castling
-        if not self.has_moved and self.can_castle_queenside(board):
+        if (
+            not self.has_moved 
+            and self.can_castle_queenside(board)
+            and not board.is_king_exposed(self.color)
+        ):
             valid_moves.append((self.position[0] - 2, self.position[1]))
 
         return valid_moves
