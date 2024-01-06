@@ -28,7 +28,6 @@ class Board:
         self.selected_piece = None
         self.painter = None
         self.last_valid_moves = []
-        self.king_positions = {"White": (4, 7), "Black": (4, 0)}
 
     def set_selected_piece(self, piece):
         if piece is not None: 
@@ -44,9 +43,18 @@ class Board:
         self.selected_piece = piece
         #print("selected piece: " + str(self.selected_piece))
 
-    def set_piece_at_position(self, position, piece):
+    def set_piece_at_position(self, piece, position):
         if piece is not None:
             piece.move(position)
+            # Disable En Passant if not done immediately
+            for enemy_pos in self.tiles:
+                enemy_piece = self.tiles.get(enemy_pos)
+                if (
+                    enemy_piece is not None
+                    and isinstance(enemy_piece, Pawn)
+                    and enemy_piece.color != piece.color
+                ):
+                    enemy_piece.en_passant_vulnerable = False
         self.tiles[position] = piece
 
     # Sets all the valid moves for every piece

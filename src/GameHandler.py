@@ -37,9 +37,7 @@ class GameHandler():
 
         #print(f"Clicked on square ({pos_x}, {pos_y})")
 
-        # If the tile is empty (no piece)
         if self.board.tiles.get((pos_x, pos_y)) is None: 
-            # If we want to move the selected piece to a new tile
             self.handle_select_empty_tile((pos_x, pos_y))
         
         # If we're selecting a piece
@@ -53,17 +51,14 @@ class GameHandler():
         if (sp is None):
             np = self.board.tiles.get(position)
             if (np.color == self.player_turn):
-                #print("Empty -> Selected Piece")
-                # Save piece as selected_piece (piece that wants to move)
                 self.board.set_selected_piece(np) 
-                # This will highlight the tile and draw the piece selected
                 self.board.painter.draw_select_new_piece(self.screen, self.board, np)
 
         # If a piece is selected already
         else:
             # If we are selecting the same piece (for deselection)
             if sp.position[0] == position[0] and sp.position[1] == position[1]:
-                
+
                 self.board.set_selected_piece(None)
                 self.board.painter.draw_deselect_selected_piece(self.screen, self.board, sp)
             # Else we want to select a new piece
@@ -74,9 +69,9 @@ class GameHandler():
                 if (sp.color != np.color) and (position in sp.get_valid_moves()):
                     old_position = sp.position
                     # Moving selected piece to new position after capture
-                    self.board.set_piece_at_position(position, sp)
+                    self.board.set_piece_at_position(sp, position)
                     self.board.set_selected_piece(None)
-                    self.board.set_piece_at_position(old_position, None)
+                    self.board.set_piece_at_position(None, old_position)
 
                     if sp.color == "White":
                         self.white_player.capture_piece(np)
@@ -89,9 +84,7 @@ class GameHandler():
                     self.switch_turn()
                     self.state_checker.check_if_lost(self.board, self.player_turn)
 
-
-                else:
-                    if (np.color == sp.color):
+                elif (np.color == sp.color):
                         # If we want to switch our selected piece
                         self.board.set_selected_piece(np)
                         self.board.painter.draw_switch_selected_piece(self.screen, self.board, sp, np)
@@ -106,17 +99,17 @@ class GameHandler():
 
             old_position = sp.position
             # Remove the piece's old position in pieces_on_board
-            self.board.set_piece_at_position(old_position, None)
+            self.board.set_piece_at_position(None, old_position)
             # Clear the currently selected piece
             self.board.set_selected_piece(None)
             # Update the position in pieces_on_board
-            self.board.set_piece_at_position(position, sp) 
+            self.board.set_piece_at_position(sp, position) 
 
             self.board.painter.draw_move_to_empty_tile(self.screen, self.board, sp, old_position)
             self.handle_castling(sp, old_position, position)
 
             # ADD EN PASSANT CHECK
-            #self.handle_en_passant()
+            self.handle_en_passant(sp, old_position, position)
 
             self.switch_turn()
             self.state_checker.check_if_lost(self.board, self.player_turn)
@@ -125,19 +118,37 @@ class GameHandler():
         if (isinstance(piece, King)) and (old_position[0] - new_position[0] == 2):
 
             rook = self.board.tiles.get((0, new_position[1]))
-            self.board.set_piece_at_position((0, new_position[1]), None)
-            self.board.set_piece_at_position((new_position[0] + 1, new_position[1]), rook)
+            self.board.set_piece_at_position(None, (0, new_position[1]))
+            self.board.set_piece_at_position(rook, (new_position[0] + 1, new_position[1]))
             self.board.painter.draw_move_to_empty_tile(self.screen, self.board, rook, (0, new_position[1]))
         # If King is castling right
         elif (isinstance(piece, King)) and (new_position[0] - old_position[0] == 2):
 
             rook = self.board.tiles.get((7, new_position[1]))
-            self.board.set_piece_at_position((7, new_position[1]), None)
-            self.board.set_piece_at_position((new_position[0] - 1, new_position[1]), rook)
+            self.board.set_piece_at_position(None, (7, new_position[1]))
+            self.board.set_piece_at_position(rook, (new_position[0] - 1, new_position[1]))
             self.board.painter.draw_move_to_empty_tile(self.screen, self.board, rook, (7, new_position[1]))
 
-    #def handle_en_passant(self, piece, old_position, new_position):
+    def handle_en_passant(self, piece, old_position, new_position):
 
+        if (
+            isinstance(piece, Pawn)
+            and abs(old_position[0] - new_position[0]) == 1  # Diagonal move
+            and abs(old_position[1] - new_position[1]) == 1  # Diagonal move
+        ):
+            # Determine the position of the passed pawn
+            passed_pawn_position = (new_position[0], old_position[1])
+
+            # Remove the passed pawn from the board
+            passed_pawn = self.board.tiles.pop(passed_pawn_position, None)
+
+            # Update the graphics
+            if passed_pawn:
+                self.board.painter.draw_regular_tile(self.screen, passed_pawn_position)
+                if piece.color == "White":
+                    self.white_player.capture_piece(passed_pawn)
+                else:
+                    self.black_player.capture_piece(passed_pawn)
 
 
     def switch_turn(self):

@@ -82,10 +82,8 @@ class Pawn(Piece):
     
     def move(self, position):
         # Check if the pawn moved two squares, making it vulnerable to en passant
-        if abs(position[1] - self.position[1]) == 2:
-            self.en_passant_vulnerable = True
-        else:
-            self.en_passant_vulnerable = False
+        self.en_passant_vulnerable = abs(position[1] - self.position[1]) == 2
+
         self.has_moved = True
         super().move(position)
     
