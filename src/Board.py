@@ -4,10 +4,12 @@ import copy
 from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn
 from BoardPainter import BoardPainter
 from MoveValidator import (
-    VerticalMoveValidator, 
-    HorizontalMoveValidator, 
-    DiagonalMoveValidator, 
-    KnightMoveValidator, 
+    VerticalMoveValidator,
+    HorizontalMoveValidator,
+    DiagonalMoveValidator,
+    KnightMoveValidator,
+    PawnMoveValidator,
+    SingleMoveValidator
 )
 
 # Constants
@@ -59,8 +61,16 @@ class Board:
         """
         Check if a given position is under attack by any opponent pieces.
         """
-        for validator in [VerticalMoveValidator(), HorizontalMoveValidator(), DiagonalMoveValidator(), KnightMoveValidator()]:
-            # Calculate valid moves per validator
+        validators = [
+            VerticalMoveValidator(),
+            HorizontalMoveValidator(),
+            DiagonalMoveValidator(),
+            KnightMoveValidator(),
+            PawnMoveValidator(),
+            SingleMoveValidator()
+        ]
+        for validator in validators:
+            # Calculate valid moves for color per validator
             moves = validator.get_valid_moves(self, position, color)
             # Check if any of the moves ends with an enemy piece that has the same validator
             for move in moves:

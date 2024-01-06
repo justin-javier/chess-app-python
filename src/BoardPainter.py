@@ -64,9 +64,7 @@ class BoardPainter:
     # Takes references to the screen, board, piece's old position, and piece
     def draw_move_to_empty_tile(self, screen, board, piece, old_position):
         self.unhighlight_valid_move_tiles(screen, board)
-        # Unhighlight the tile that the piece is moving from
         self.draw_regular_tile(screen, old_position)
-        # Draw piece and tile at the destination
         self.draw_piece(screen, piece)
 
     def draw_switch_selected_piece(self, screen, board, old_piece, new_piece):

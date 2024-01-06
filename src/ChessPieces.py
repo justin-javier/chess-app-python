@@ -32,7 +32,7 @@ class Piece():
             if move == position: return True
 
     def calculate_valid_moves(self, board):
-        # Clear previous valid moves
+
         valid_moves = []
         for validator in self.move_validators:
             initial_moves = validator.get_valid_moves(board, self.position, self.color)
@@ -42,9 +42,12 @@ class Piece():
                 # Temporarily move piece to new position and see if the king is exposed
                 original_position = self.position
                 temp_piece = board.tiles.get(move)
-                #print("Temporarily moving " + str(temp_piece) + " and " + str(self))
-                #board.set_piece_at_position(self.position, None)  # Empty old position
-                #board.set_piece_at_position(move, self)  # Populate new possible position
+
+                '''
+                Without set_piece_at_position, a piece's move function is not called
+                This helps us perform calculations on temporary board states
+                '''
+
                 board.tiles[original_position] = None
                 board.tiles[move] = self
 
@@ -74,6 +77,7 @@ class Pawn(Piece):
         self.move_validators.extend([
             PawnMoveValidator()
         ])
+        self.has_moved = False
         self.en_passant_vulnerable = False
     
     def move(self, position):
@@ -82,8 +86,32 @@ class Pawn(Piece):
             self.en_passant_vulnerable = True
         else:
             self.en_passant_vulnerable = False
-            
+        self.has_moved = True
         super().move(position)
+    
+    def calculate_valid_moves(self, board):
+
+        valid_moves = super().calculate_valid_moves(board)
+
+        y_direction = -1 if self.color == "White" else 1
+
+        # Adding En Passant moves
+        # Pieces beside the pawn
+        check_positions = [(self.position[0] - 1, self.position[1]), (self.position[0] + 1, self.position[1])]
+        for pos in check_positions:
+            if 0 <= pos[0] < GRID_SIZE and 0 <= pos[1] < GRID_SIZE:
+                check_piece = board.tiles.get(pos)
+
+                if (
+                    check_piece is not None 
+                    and isinstance(check_piece, Pawn) 
+                    and check_piece.color != self.color 
+                    and check_piece.en_passant_vulnerable
+                ):
+                    new_move = (pos[0], pos[1] + y_direction)
+                    valid_moves.append(new_move)
+        
+        return valid_moves
 
 
 class Knight(Piece):

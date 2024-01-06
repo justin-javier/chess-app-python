@@ -34,7 +34,7 @@ class StateChecker:
         return False
 
     # Takes the color of who may have now lost
-    def check_game_end(self, board, color):
+    def check_if_lost(self, board, color):
         winning_color = "White" if color == "Black" else "Black"
 
         # Check for checkmate

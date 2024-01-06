@@ -32,7 +32,7 @@ class Game:
         update_display = False
 
         clock = pygame.time.Clock()
-        FRAME_RATE = 5
+        FRAME_RATE = 15
 
         pygame.display.flip()
         # Main game loop

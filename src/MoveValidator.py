@@ -1,3 +1,4 @@
+
 # Constants
 WIDTH, HEIGHT = 600, 600
 GRID_SIZE = 8
@@ -160,10 +161,7 @@ class PawnMoveValidator(MoveValidator):
         # Define the direction of pawn movement based on its color
         y_direction = -1 if color == "White" else 1
 
-        if (color == "Black" and position[1] == 1) or (color == "White" and position[1] == 6):
-            has_moved = False
-        else:
-            has_moved = True
+        pawn = board.tiles[position]
 
         # Single step forward
         new_position = (position[0], position[1] + y_direction)
@@ -173,7 +171,7 @@ class PawnMoveValidator(MoveValidator):
                 valid_moves.append(new_position)
 
                 # If the pawn hasn't moved yet, allow for the double step forward
-                if not has_moved:
+                if not pawn.has_moved:
                     new_position = (position[0], position[1] + 2 * y_direction)
                     check_piece = board.tiles.get(new_position)
                     if check_piece is None:
