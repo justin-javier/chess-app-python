@@ -1,6 +1,7 @@
 import pygame
 import os
 import copy
+import random
 from ChessPieces import Piece, King, Queen, Rook, Knight, Bishop, Pawn
 from BoardPainter import BoardPainter
 from MoveValidator import (
@@ -27,8 +28,7 @@ class Board:
         self.tiles = {}
         self.selected_piece = None
         self.last_valid_moves = []
-        self.painter = BoardPainter()
-
+        self.painter = None
         self.init_start_positions()
 
     def set_selected_piece(self, piece):
@@ -59,13 +59,18 @@ class Board:
                     enemy_piece.en_passant_vulnerable = False
         self.tiles[position] = piece
 
-    # Sets all the valid moves for every piece
-    def set_all_valid_moves(self):
+    # Get all the valid moves for every piece of a color
+    def get_color_valid_moves(self, color):
+        ai_pieces = [piece for piece in board.tiles.values() if piece and piece.color == self.color]
+        # Select a random piece
+        selected_piece = random.choice(ai_pieces)
+
+        valid_moves = selected_piece.get_valid_moves(self)
         for position in self.tiles.values():
             piece = self.tiles.get(position)
-            if piece is not None:
+            if piece is not None and piece.color == color:
                 valid_moves = piece.calculate_valid_moves(self)
-                piece.set_valid_moves(valid_moves)
+        return valid_moves
     
     def is_position_under_attack(self, position, color):
         """
@@ -109,6 +114,20 @@ class Board:
             if piece is not None and isinstance(piece, King) and piece.color == color:
                 return pos
         return
+    
+    def create_piece_instance(self, option, color, position):
+        # Create an instance of the selected piece based on the option
+        if option == "Queen":
+            return Queen(color, position)
+        elif option == "Rook":
+            return Rook(color, position)
+        elif option == "Knight":
+            return Knight(color, position)
+        elif option == "Bishop":
+            return Bishop(color, position)
+        else:
+            # Handle unexpected option (return None, raise an exception, or provide a default)
+            return None
 
     # Populate the pieces_on_board with the starting positions of all pieces
     def init_start_positions(self):
@@ -127,5 +146,9 @@ class Board:
 
             self.tiles[(i, 0)] = black_piece
             self.tiles[(i, 7)] = white_piece
+
+    def init_display(self, screen):    
+        self.painter = BoardPainter(screen)
+
 
 

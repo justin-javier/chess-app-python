@@ -26,8 +26,8 @@ class Game:
 
     def main(self): 
 
-        self.board.painter.draw_board(self.screen) 
-        self.board.painter.draw_all_pieces(self.screen, self.board)
+        self.board.painter.draw_board() 
+        self.board.painter.draw_all_pieces(self.board)
 
         clock = pygame.time.Clock()
         FRAME_RATE = 15
@@ -40,9 +40,8 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN: 
-
                     self.handler.handle_mouse_click(event)
-                    pygame.display.flip() # Makes refreshing images pretty efficient
+                    pygame.display.flip()
             
             clock.tick(FRAME_RATE)
 
