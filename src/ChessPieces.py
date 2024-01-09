@@ -56,10 +56,10 @@ class Piece:
                     filtered_moves.append(move)
 
                 # Undo the temporary move
-                #board.set_piece_at_position(move, temp_piece)
-                #board.set_piece_at_position(original_position, self)
+
                 board.tiles[move] = temp_piece
                 board.tiles[original_position] = self
+
             valid_moves.extend(filtered_moves)
 
         return valid_moves
@@ -186,6 +186,9 @@ class King(Piece):
         return valid_moves
 
     def can_castle_kingside(self, board):
+        if self.has_moved or board.is_king_exposed(self.color):
+            return False
+
         for i in range(self.position[0] + 1, GRID_SIZE - 1):
             piece = board.tiles.get((i, self.position[1]))
             if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):
@@ -194,6 +197,9 @@ class King(Piece):
         return isinstance(rook, Rook) and not rook.has_moved
 
     def can_castle_queenside(self, board):
+        if self.has_moved or board.is_king_exposed(self.color):
+            return False
+
         for i in range(self.position[0] - 1, 0, -1):
             piece = board.tiles.get((i, self.position[1]))
             if piece is not None or board.is_position_under_attack((i, self.position[1]), self.color):

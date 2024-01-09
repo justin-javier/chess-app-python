@@ -172,10 +172,15 @@ class PawnMoveValidator(MoveValidator):
 
                 # If the pawn hasn't moved yet, allow for the double step forward
                 if pawn is not None and pawn.get_piece_type() == "Pawn" and not pawn.has_moved:
-                    new_position = (position[0], position[1] + 2 * y_direction)
-                    check_piece = board.tiles.get(new_position)
-                    if check_piece is None:
-                        valid_moves.append(new_position)
+
+                    if (
+                        (pawn.color == "White" and position[1] == 6) 
+                        or (pawn.color == "Black" and position[1] == 1)
+                    ):
+                        new_position = (position[0], position[1] + 2 * y_direction)
+                        check_piece = board.tiles.get(new_position)
+                        if check_piece is None:
+                            valid_moves.append(new_position)
 
         # Diagonal captures
         capture_offsets = [(1, y_direction), (-1, y_direction)]
